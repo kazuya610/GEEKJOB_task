@@ -1,0 +1,172 @@
+package data13;
+
+import static java.lang.System.*;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ * Servlet implementation class Data13_auth2
+ */
+public class Data13_auth2 extends HttpServlet {
+
+	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+
+        Connection db_con = null;
+        PreparedStatement db_st = null;
+        ResultSet db_data = null;
+
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>登録完了ページ</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>登録完了</h1>");
+
+            // 直リンク防止
+            HttpSession session = request.getSession();
+            Object login = session.getAttribute("login");
+            if (login == null || !login.equals("OK")){
+                session.setAttribute("login", null);
+                response.sendRedirect("Data13_login.jsp");
+            }
+
+
+            // セッション情報の文字化け対策
+            request.setCharacterEncoding("UTF-8");
+
+            // jspファイルの入力データを取得
+            String data1 = request.getParameter("productID");  // ID
+            int int_data1 = Integer.parseInt(data1); // 整数に変換
+            String data2 = request.getParameter("category");  // カテゴリー
+            String data3 = request.getParameter("name");  // 商品名
+            String data4 = request.getParameter("price");  // 価格
+            int int_data4 = Integer.parseInt(data4); // 整数に変換
+            String data5 = request.getParameter("delivery");  // 配送料
+            int int_data5 = Integer.parseInt(data5); // 整数に変換
+            String data6 = request.getParameter("maker");  // メーカー
+            String data7 = request.getParameter("size");  // サイズ
+            String data8 = request.getParameter("introduction");  // 説明文
+            String data9 = request.getParameter("point");  // ポイント
+            int int_data9 = Integer.parseInt(data9); // 整数に変換
+
+
+            // データベースに接続
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            // 1つ目はURL、2つ目はuser、3つ目はパスワード
+            db_con = DriverManager.getConnection("jdbc:mysql://localhost:3306/challenge_db", "root", "");
+
+            // SQL文の宣言
+            db_st = db_con.prepareStatement("insert into ec_product values(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            db_st.setInt(1,int_data1);
+            db_st.setString(2,data2);
+            db_st.setString(3,data3);
+            db_st.setInt(4,int_data4);
+            db_st.setInt(5,int_data5);
+            db_st.setString(6,data6);
+            db_st.setString(7,data7);
+            db_st.setString(8,data8);
+            db_st.setInt(9,int_data9);
+
+            // SQL文の実行
+            db_st.executeUpdate();
+
+            // SQL文を宣言
+            db_st = db_con.prepareStatement("select * from ec_product "
+            		+ "where productID = (select max(productID) from ec_product)");
+            // SQL文の実行
+            db_data = db_st.executeQuery();
+
+            // 各ページへのリンク
+            out.println("<a href=\"data13_auth1.jsp\">商品登録</a>　");
+            out.println("<a href=\"Data13_auth3\">商品一覧</a>　");
+            out.println("<a href=\"Data13_logout\">ログアウト</a><br>");
+
+            // 商品一覧の表示
+            out.println("商品の登録が完了しました。<br>");
+            out.println("登録した商品情報<br>");
+
+            while(db_data.next()){
+                // 9種類のデータを表示するための変数の定義
+                int productID = db_data.getInt("productID");
+                String category = db_data.getString("category");
+                String name = db_data.getString("name");
+                int price = db_data.getInt("price");
+                int delivery = db_data.getInt("delivery");
+                String maker = db_data.getString("maker");
+                String size = db_data.getString("size");
+                String introduction = db_data.getString("introduction");
+                int point = db_data.getInt("point");
+
+                out.println("商品ID:" + productID + "<br>");
+                out.println("商品カテゴリー:" + category + "<br>");
+                out.println("商品名:" + name + "<br>");
+                out.println("価格:" + price + "<br>");
+                out.println("配送料:" + delivery + "<br>");
+                out.println("メーカー:" + maker + "<br>");
+                out.println("サイズ:" + size + "<br>");
+                out.println("商品説明文:" + introduction + "<br>");
+                out.println("ポイント数:" + point + "<br>");
+                out.println("<br>");
+                out.println("<br>");
+            }
+
+            out.println("商品登録ページに戻る<br>");
+
+            // 操作完了後、クローズ
+            db_con.close();
+            db_st.close();
+            db_data.close();
+
+        }catch(SQLException e_sql){
+            out.println("接続時にエラーが発生しました：" + e_sql.toString());
+        }catch(Exception e){
+            out.println("接続時にエラーが発生しました：" + e.toString());
+        }finally{
+            if(db_con != null){
+                try{
+                    db_con.close();
+                }catch(SQLException e_con){
+                    System.out.println(e_con.getMessage());
+                }
+            }
+        }
+            out.println("</body>");
+            out.println("</html>");
+    }
+
+
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		processRequest(request, response);
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		processRequest(request, response);
+	}
+
+}
