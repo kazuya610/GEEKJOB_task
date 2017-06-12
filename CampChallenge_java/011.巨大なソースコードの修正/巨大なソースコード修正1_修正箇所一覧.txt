@@ -1,0 +1,25 @@
+巨大なソースコードの修正１
+
+■主な修正箇所
+
+●モデル
+・UserDataBeans：【第一段階タスク3】UserDataBeansファイルの新規作成
+・UserDataDTO：修正無し
+・UserDataDAO：【第一段階タスク6】生年月日を正しく格納できるように変更
+
+●JSP
+共通の修正：【第一段階タスク1】ホームへのリンク追加
+・index：修正無し
+・insert：【第一段階タスク5】
+        　　各フォームのvalueに確認画面（insertconfirm.jsp）から引き継いだ値を設定
+・insertconfirm：【第一段階タスク4】
+        　　　　　フォームが空の時はエラー文を出すためのif文を用意
+・insertresult：【第一段階タスク7：】セッションのクリア
+・error：修正無し
+
+●サーブレット
+・insert：【第一段階タスク5】セッション管理
+・insertconfirm：【第一段階タスク5】フォームから受け取ったデータをUserDataBeansに格納
+・insertresult：【第一段階タスク2】直リンク防止処理
+　　　　　　　　【第一段階タスク6：生年月日を格納できるように修正】
+
